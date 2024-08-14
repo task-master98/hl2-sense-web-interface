@@ -24,8 +24,8 @@ async def main():
     loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
 
     port = int(os.environ.get("PORT", "8001"))
-    async with websockets.serve(handler, "0.0.0.0", port):
-        print(f"WebSocket server started on ws://0.0.0.0:{port}")
+    async with websockets.serve(handler, "", port):
+        print(f"WebSocket server started on :{port}")
         await stop
 
 if __name__ == "__main__":
