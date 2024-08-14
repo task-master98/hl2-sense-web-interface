@@ -1,2 +1,2 @@
 web: streamlit run app.py --server.port=$PORT
-worker: python server.py
+worker: python websocket_server.py
