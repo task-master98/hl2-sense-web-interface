@@ -1,6 +1,7 @@
+import os
 import asyncio
 import websockets
-import json
+import signal
 
 CONNECTED_CLIENTS = set()
 
@@ -18,9 +19,14 @@ async def handler(websocket, path):
         print(f"Client disconnected: {websocket.remote_address}")
 
 async def main():
-    async with websockets.serve(handler, "0.0.0.0", 8080):
-        print("WebSocket server started on ws://0.0.0.0:8080")
-        await asyncio.Future()
+    loop = asyncio.get_running_loop()
+    stop = loop.create_future()
+    loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
+
+    port = int(os.environ.get("PORT", "8001"))
+    async with websockets.serve(handler, "0.0.0.0", port):
+        print(f"WebSocket server started on ws://0.0.0.0:{port}")
+        await stop
 
 if __name__ == "__main__":
     asyncio.run(main())
