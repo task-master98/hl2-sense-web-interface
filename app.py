@@ -1,6 +1,7 @@
 import streamlit as st
 import asyncio
 import websockets
+import traceback
 
 async def send_command(command):
     try:
@@ -8,7 +9,8 @@ async def send_command(command):
             await websocket.send(command)
             print(f"Sent command : {command}")
     except Exception as e:
-        print(f"Error sending {command}: {e}")
+        print(f"Error sending {command}: {str(e)}")
+        traceback.print_exc()
 
 def send_command_async(command):
     loop = asyncio.new_event_loop()
