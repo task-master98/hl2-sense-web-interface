@@ -5,7 +5,7 @@ import traceback
 
 async def send_command(command):
     try:
-        async with websockets.connect("wss://hololens-sense-9bd80b459134.herokuapp.com:8001/") as websocket:
+        async with websockets.connect("https://hololens-sense-9bd80b459134.herokuapp.com") as websocket:
             await websocket.send(command)
             print(f"Sent command : {command}")
     except Exception as e:
