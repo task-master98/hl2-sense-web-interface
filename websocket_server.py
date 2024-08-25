@@ -8,15 +8,15 @@ CONNECTED_CLIENTS = set()
 async def handler(websocket, path):
     CONNECTED_CLIENTS.add(websocket)
     print(f"Client connected: {websocket.remote_address}")
-    try:
-        async for message in websocket:
-            print(f"Received message: {message}")
-            for client in CONNECTED_CLIENTS:
-                if client != websocket and client.open:
-                    await client.send(message)
-    finally:
-        CONNECTED_CLIENTS.remove(websocket)
-        print(f"Client disconnected: {websocket.remote_address}")
+    # try:
+    async for message in websocket:
+        print(f"Received message: {message}")
+        for client in CONNECTED_CLIENTS:
+            if client != websocket and client.open:
+                await client.send(message)
+    # finally:
+    #     CONNECTED_CLIENTS.remove(websocket)
+    #     print(f"Client disconnected: {websocket.remote_address}")
 
 async def main():
     loop = asyncio.get_running_loop()
