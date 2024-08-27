@@ -4,19 +4,25 @@ import websockets
 import signal
 
 CONNECTED_CLIENTS = set()
+UPLOAD_FOLDER = "frames/"
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 async def handler(websocket, path):
     CONNECTED_CLIENTS.add(websocket)
     print(f"Client connected: {websocket.remote_address}")
-    # try:
+    
     async for message in websocket:
         print(f"Received message: {message}")
+
+        if isinstance(message, bytes):
+            with open(os.path.join(UPLOAD_FOLDER, "captured_frame.png"), "wb") as f:
+                f.write(message)
+            print(f"Frame received and saved")
         for client in CONNECTED_CLIENTS:
             if client != websocket and client.open:
                 await client.send(message)
-    # finally:
-    #     CONNECTED_CLIENTS.remove(websocket)
-    #     print(f"Client disconnected: {websocket.remote_address}")
+    
 
 async def main():
     loop = asyncio.get_running_loop()
