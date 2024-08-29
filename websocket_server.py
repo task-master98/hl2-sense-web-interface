@@ -3,25 +3,28 @@ import asyncio
 import websockets
 import signal
 
-CONNECTED_CLIENTS = set()
-UPLOAD_FOLDER = "frames/"
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+CONNECTED_CLIENTS = {}
 
 async def handler(websocket, path):
-    CONNECTED_CLIENTS.add(websocket)
-    print(f"Client connected: {websocket.remote_address}")
-    
-    async for message in websocket:
-        print(f"Received message: {message}")
+    try:
+        # Wait for client to send its identifier (e.g., "device_name: hololens" or "device_name: web_app")
+        identifier_message = await websocket.recv()
+        device_name = identifier_message.split(":")[1].strip()
+        CONNECTED_CLIENTS[websocket] = device_name
+        print(f"Client connected: {device_name} ({websocket.remote_address})")
 
-        if isinstance(message, bytes):
-            with open(os.path.join(UPLOAD_FOLDER, "captured_frame.png"), "wb") as f:
-                f.write(message)
-            print(f"Frame received and saved")
-        for client in CONNECTED_CLIENTS:
-            if client != websocket and client.open:
-                await client.send(message)
+        async for message in websocket:
+            if isinstance(message, bytes):  # Binary data (frame)
+                # Only send the frame to web application clients
+                for client, device in CONNECTED_CLIENTS.items():
+                    if device == "web_app" and client.open:
+                        await client.send(message)
+            else:
+                print(f"Received command from {device_name}: {message}")
+
+    finally:
+        del CONNECTED_CLIENTS[websocket]
+        print(f"Client {device_name} disconnected.")
     
 
 async def main():
